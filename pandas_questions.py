@@ -53,13 +53,16 @@ def merge_referendum_and_areas(referendum, regions_and_departments):
     France, like Guadaloupe, Reunion, or Tahiti.
     """
 
-    referendum = referendum[~referendum["Department code"].str.contains("Z", regex=False, na=False)]
-    
-    referendum["Department code"] = referendum["Department code"].astype(str).str.zfill(2)
+    referendum = referendum[~referendum["Department code"]
+                            .str.contains("Z", regex=False, na=False)]
+    referendum["Department code"] = referendum[
+                                        "Department code"].astype(str).str.zfill(2)
+    regions_and_departments["code_dep"] = regions_and_departments[
+                                            "code_dep"].astype(str).str.zfill(2)
 
-    regions_and_departments["code_dep"] = regions_and_departments["code_dep"].astype(str).str.zfill(2)
-
-    referendum_and_areas = referendum.merge(regions_and_departments, left_on="Department code", right_on="code_dep").dropna()
+    referendum_and_areas = referendum.merge(regions_and_departments, 
+                                            left_on="Department code", 
+                                            right_on="code_dep").dropna()
 
     return referendum_and_areas
 
@@ -72,9 +75,7 @@ def compute_referendum_result_by_regions(referendum_and_areas):
     """
 
     cols = ["Registered", "Abstentions", "Null", "Choice A", "Choice B"]
-
     referendum_and_areas = referendum_and_areas.groupby(["code_reg", "name_reg"])
-
     return referendum_and_areas[cols].sum().reset_index("name_reg")
 
 
@@ -89,21 +90,13 @@ def plot_referendum_map(referendum_result_by_regions):
     """
 
     gdf = gpd.read_file("data/regions.geojson")
-    
     res = referendum_result_by_regions.reset_index()
-
     res["code_reg"] = res["code_reg"].astype(str).str.zfill(2)
-
     gdf["code"] = gdf["code"].astype(str).str.zfill(2)
-
     gdf = gdf.merge(res, left_on="code", right_on="code_reg")
-
     gdf["ratio"] = gdf["Choice A"] / (gdf["Choice A"] + gdf["Choice B"])
-
     gdf.plot(column="ratio", legend=True)
-
     plt.title("Rate of 'Choice A' over expressed ballots")
-
     return gdf
 
 
