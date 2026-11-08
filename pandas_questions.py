@@ -60,8 +60,8 @@ def merge_referendum_and_areas(referendum, regions_and_departments):
     regions_and_departments["code_dep"] = regions_and_departments[
                                             "code_dep"].astype(str).str.zfill(2)
 
-    referendum_and_areas = referendum.merge(regions_and_departments, 
-                                            left_on="Department code", 
+    referendum_and_areas = referendum.merge(regions_and_departments,
+                                            left_on="Department code",
                                             right_on="code_dep").dropna()
 
     return referendum_and_areas
